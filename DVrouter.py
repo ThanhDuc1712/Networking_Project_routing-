@@ -21,6 +21,10 @@ class DVrouter(Router):
         self.last_time = 0
         # TODO
         #   add your own class fields and initialization code here
+        self.neighbors = {}
+        self.neighbors_dvs = {}
+        self.distance = {addr: 0}
+        self.nexthop = {}
         pass
 
     def handle_packet(self, port, packet):
@@ -46,6 +50,13 @@ class DVrouter(Router):
         #   update the distance vector of this router
         #   update the forwarding table
         #   broadcast the distance vector of this router to neighbors
+        self.neighbors[port] = (endpoint, cost)
+        self.neighbors_dvs[post] = {}
+        
+        if endpoint not in self.distance or cost < self.distance[endpoint]:
+            self.distance[endpoint] = cost
+            self.nexthop[endpoint] = post
+        
         pass
 
     def handle_remove_link(self, port):
