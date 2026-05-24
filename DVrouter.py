@@ -5,6 +5,8 @@
 #####################################################
 
 from router import Router
+import json
+from packet from Packet
 
 
 class DVrouter(Router):
@@ -26,6 +28,13 @@ class DVrouter(Router):
         self.distance = {addr: 0}
         self.nexthop = {}
         pass
+    
+    def broadcast_dv(self){
+        content = json.dumps(self.distance)
+        for port in self.neighbors:
+            packet = Packet(Packet.ROUNTING, self.addr, self.neighbors[port][0], content)
+            self.send(port, packet)
+    }
 
     def handle_packet(self, port, packet):
         """Process incoming packet."""
@@ -51,11 +60,11 @@ class DVrouter(Router):
         #   update the forwarding table
         #   broadcast the distance vector of this router to neighbors
         self.neighbors[port] = (endpoint, cost)
-        self.neighbors_dvs[post] = {}
+        self.neighbors_dvs[port] = {}
         
         if endpoint not in self.distance or cost < self.distance[endpoint]:
             self.distance[endpoint] = cost
-            self.nexthop[endpoint] = post
+            self.nexthop[endpoint] = port
         
         pass
 
