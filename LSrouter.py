@@ -147,7 +147,7 @@ class LSrouter(Router):
     def handle_time(self, time_ms):
         if time_ms - self.last_time >= self.heartbeat_time:
             self.last_time = time_ms
-            self.broadcast_own_ls_()
+            self._broadcast_own_ls()
 
     def __repr__(self):
         lines = [f"LSrouter(addr={self.addr}, seq={self.seq_num})"]
