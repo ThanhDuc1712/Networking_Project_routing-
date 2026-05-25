@@ -77,26 +77,6 @@ class LSrouter(Router):
                     self.forwarding_table[dest] = port
                     break
 
-    def _recompute_forwarding_table(self):
-        self.forwarding_table = {}
-        try:
-            _, paths = nx.single_source_dijkstra(
-                self.graph, self.addr, weight="weight"
-            )
-        except Exception:
-            return
-
-        for dest, path in paths.items():
-            if dest == self.addr:
-                continue
-            if len(path) < 2:
-                continue
-            next_hop = path[1]
-            for port, (neighbor_addr, _) in self.neighbors.items():
-                if neighbor_addr == next_hop:
-                    self.forwarding_table[dest] = port
-                    break
-
     # ------------------------------------------------------------------
     # Giao diện chính của Router
     # ------------------------------------------------------------------
@@ -167,7 +147,7 @@ class LSrouter(Router):
     def handle_time(self, time_ms):
         if time_ms - self.last_time >= self.heartbeat_time:
             self.last_time = time_ms
-            self.broadcast_own_ls()
+            self.broadcast_own_ls_()
 
     def __repr__(self):
         lines = [f"LSrouter(addr={self.addr}, seq={self.seq_num})"]
