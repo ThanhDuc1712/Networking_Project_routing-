@@ -21,7 +21,7 @@ class LSrouter(Router):
         self.graph.add_node(self.addr)
 
         self.forwarding_table = {}
-        self.neighbor = {}
+        self.neighbors = {}
         self.seq_num = 0
 
         self.link_state_db = {
@@ -58,7 +58,6 @@ class LSrouter(Router):
             self.graph.add_edge(src, neighbor, weight=cost)
 
     def _recompute_forwarding_table(self):
-        """Rebuild forwarding table by running Dijkstra on the updated graph."""
         self.forwarding_table = {}
         try:
             _, paths = nx.single_source_dijkstra(
@@ -79,7 +78,6 @@ class LSrouter(Router):
                     break
 
     def _recompute_forwarding_table(self):
-        # Dùng thuật toán Dijkstra trên đồ thị để tính toán lại bảng chuyển tiếp.
         self.forwarding_table = {}
         try:
             _, paths = nx.single_source_dijkstra(
@@ -104,7 +102,6 @@ class LSrouter(Router):
     # ------------------------------------------------------------------
 
     def handle_packet(self, port, packet):
-        """Process incoming packet."""
         if packet.is_traceroute:
             if packet.dst_addr in self.forwarding_table:
                 self.send(self.forwarding_table[packet.dst_addr], packet)
@@ -134,7 +131,6 @@ class LSrouter(Router):
                 self.send(out_port, fwd)
 
     def handle_new_link(self, port, endpoint, cost):
-        """Handle new link."""
         self.neighbors[port] = (endpoint, cost)
 
         if not self.graph.has_node(endpoint):
@@ -151,7 +147,6 @@ class LSrouter(Router):
         self._broadcast_own_ls()
 
     def handle_remove_link(self, port):
-        """Handle removed link."""
         if port not in self.neighbors:
             return
 
@@ -170,21 +165,11 @@ class LSrouter(Router):
         self._broadcast_own_ls()
 
     def handle_time(self, time_ms):
-        """Handle current time."""
         if time_ms - self.last_time >= self.heartbeat_time:
             self.last_time = time_ms
-            # TODO
-            #   broadcast the link state of this router to all neighbors
-            pass
-
-    def __repr__(self, time_ms):
-        """Representation for debugging in the network visualizer."""
-        if time_ms - self.last_time >= self.heartbeat_time:
-            self.last_time = time_ms
-            self._broadcast_own_ls()
+            self.broadcast_own_ls()
 
     def __repr__(self):
-        # In ra cấu trúc dữ liệu của router để hỗ trợ debug trên trình mô phỏng.
         lines = [f"LSrouter(addr={self.addr}, seq={self.seq_num})"]
         lines.append("  neighbors:")
         for port, (addr, cost) in self.neighbors.items():
